@@ -1,0 +1,53 @@
+# -----------------------------------------------------------------------------
+# GitHub OIDC and Terraform state smoke test
+# Runs manually on the registered Mac after approval for dev or prod.
+# Confirms the selected role and read-only access to the state bucket location.
+# -----------------------------------------------------------------------------
+name: OIDC state smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: AWS environment to verify
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # OIDC role and state bucket connection
+  # GitHub environment approval and main-branch restrictions apply here.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Verify ${{ inputs.environment }} OIDC
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS, X64, aws-interviews-local]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Assume environment role through OIDC
+        uses: aws-actions/configure-aws-credentials@v4.2.1
+        with:
+          aws-region: eu-west-3
+          role-to-assume: ${{ inputs.environment == 'prod' && vars.AWS_PROD_ROLE_ARN || vars.AWS_DEV_ROLE_ARN }}
+          role-session-name: oidc-state-smoke
+          unset-current-credentials: true
+          mask-aws-account-id: true
+      - name: Verify identity and state bucket location
+        env:
+          EXPECTED_ROLE: aws-interviews-${{ inputs.environment }}-deploy
+          STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          role_arn="$(aws sts get-caller-identity --query Arn --output text)"
+          case "$role_arn" in
+            *":assumed-role/${EXPECTED_ROLE}/"*) ;;
+            *) echo 'Unexpected AWS role' >&2; exit 1 ;;
+          esac
+          region="$(aws s3api get-bucket-location --bucket "$STATE_BUCKET" --query LocationConstraint --output text)"
+          test "$region" = 'eu-west-3'
