@@ -127,7 +127,7 @@ The user monitors approximately **USD 200 of AWS credits separately**, as decide
 
 ## 7. Terraform and GitHub Actions
 
-`dev` and `prod` have separate Terraform states and deployment roles. AWS infrastructure is created and changed only by Terraform executed in GitHub Actions. Workflows use OIDC and least-privilege permissions. The bootstrap role and remote state backend are initialized through a documented Terraform workflow, with no state or credentials committed. Provider, tool, and dependency versions are pinned. AgentCore may use the official `awscc` provider if its resource is not yet available in `hashicorp/aws` when implementation begins. [Terraform AgentCore Runtime resource](https://registry.terraform.io/providers/hashicorp/awscc/latest/docs/resources/bedrockagentcore_runtime).
+`dev` and `prod` have separate Terraform states and deployment roles. The GitHub OIDC provider, shared remote state bucket, and environment deployment roles are manually provisioned prerequisites. Application infrastructure is created and changed only by Terraform executed in GitHub Actions. Workflows use OIDC and least-privilege permissions, with no state or credentials committed. Provider, tool, and dependency versions are pinned. AgentCore may use the official `awscc` provider if its resource is not yet available in `hashicorp/aws` when implementation begins. [Terraform AgentCore Runtime resource](https://registry.terraform.io/providers/hashicorp/awscc/latest/docs/resources/bedrockagentcore_runtime).
 
 PR checks reuse the quality modules found in the local Structor repositories:
 
