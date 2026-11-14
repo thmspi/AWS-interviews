@@ -17,6 +17,25 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # Pull request branch routing
+  # Production changes enter main only through a PR from develop.
+  # ---------------------------------------------------------------------------
+  branch-routing:
+    name: Branch routing
+    runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ github.base_ref }}
+      HEAD_REF: ${{ github.head_ref }}
+      HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+    steps:
+      - name: Check production PR source
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == 'pull_request' && "$BASE_REF" == 'main' ]]; then
+            test "$HEAD_REF" = 'develop'
+            test "$HEAD_REPOSITORY" = "$GITHUB_REPOSITORY"
+          fi
+
+  # ---------------------------------------------------------------------------
   # Terraform format and validation
   # Initializes providers locally without connecting to either state backend.
   # ---------------------------------------------------------------------------

@@ -1,0 +1,47 @@
+# -----------------------------------------------------------------------------
+# Preserve merged feature history in the Git graph
+# Tags the original feature tip after a squash merge into develop.
+# GitHub may then delete the head branch while the tag keeps its commits visible.
+# -----------------------------------------------------------------------------
+name: Preserve merged feature history
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Tag the squashed PR's original tip
+  # A merged/pr-N/branch-name tag preserves the original feature line.
+  # ---------------------------------------------------------------------------
+  preserve:
+    name: Tag merged feature tip
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Find merged PR and create history tag
+        run: |
+          set -euo pipefail
+          pull_requests="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls")"
+          pull_request="$(jq -c --arg sha "$GITHUB_SHA" --arg repo "$GITHUB_REPOSITORY" \
+            '[.[] | select(.merged_at != null and .base.ref == "develop" and .merge_commit_sha == $sha and .head.repo.full_name == $repo)] | .[0] // empty' \
+            <<< "$pull_requests")"
+          if [[ -z "$pull_request" ]]; then
+            exit 0
+          fi
+          number="$(jq -r '.number' <<< "$pull_request")"
+          branch="$(jq -r '.head.ref' <<< "$pull_request")"
+          head_sha="$(jq -r '.head.sha' <<< "$pull_request")"
+          tag="merged/pr-${number}/${branch}"
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            exit 0
+          fi
+          gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/$tag" \
+            -f sha="$head_sha" >/dev/null
