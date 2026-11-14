@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Terraform pull request checks
-# Validates application Terraform without AWS credentials.
+# Validates every pull request and protected branch push without AWS credentials.
 # Checks source configuration only; plans and state never become CI artifacts.
 # -----------------------------------------------------------------------------
 name: Terraform checks
@@ -9,6 +9,7 @@ on:
   pull_request:
   push:
     branches:
+      - develop
       - main
 
 permissions:
@@ -54,7 +55,7 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # GitHub Actions syntax checks
-  # Catches workflow errors before changes reach the main branch.
+  # Catches workflow errors before changes reach develop or main.
   # ---------------------------------------------------------------------------
   workflow:
     name: Workflow syntax

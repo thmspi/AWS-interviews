@@ -137,7 +137,7 @@ PR checks reuse the quality modules found in the local Structor repositories:
 | `structor-frontend/gitlab-ci/_frontend-base.yml` | Reproducible install, lint, typecheck, unit tests, and Vite build. |
 | `structor-infra/gitlab-ci/_terraform-base.yml` | `terraform fmt -check`, `validate`, plan, and Checkov; blocking results for PRs authorized to access plan state. |
 
-Scripts are adapted to this repository's paths and dependencies; GitLab YAML is not included directly. A PR does not publish the frontend or container, apply Terraform, or expose a binary/JSON plan that might contain sensitive values. Same-repository PRs may plan with a restricted read role; external PRs run credential-free checks and require a controlled rerun from a trusted branch before merge. No required check becomes manual, optional, or disabled to obtain a green result. After merge, a workflow deploys `dev`; promotion to `prod` requires environment approval and passing checks. Only these workflows publish artifacts.
+Scripts are adapted to this repository's paths and dependencies; GitLab YAML is not included directly. A PR does not publish the frontend or container, apply Terraform, or expose a binary/JSON plan that might contain sensitive values. Same-repository PRs may plan with a restricted read role; external PRs run credential-free checks and require a controlled rerun from a trusted branch before merge. No required check becomes manual, optional, or disabled to obtain a green result. `develop` and feature branches may deploy `dev`; only `main` may deploy `prod`, after environment approval and passing checks. Only these workflows publish artifacts.
 
 ## 8. Tests and release criteria
 
