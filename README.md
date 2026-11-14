@@ -13,7 +13,7 @@ The IAM trust policies match this repository's ID-bound GitHub OIDC subject, `re
 
 The `infra/backend/` files contain the environment-specific state key, encryption, and locking settings. Supply `TF_STATE_BUCKET` and region `eu-west-3` when initializing each environment. Application resource permissions must be added to the matching role as those resources are defined. No AWS apply is part of the current CI checks.
 
-The **OIDC state smoke** workflow runs on the local runner after any repository branch push. It uses the dev role outside `main` and the prod role on `main`, verifies the assumed role, and reads the state bucket location without changing AWS resources. The credential-free Terraform checks run for every pull request, regardless of its target branch.
+The **OIDC state smoke** workflow runs on the remote Linux runner after any repository branch push. It uses the dev role outside `main` and the prod role on `main`, verifies the assumed role, and reads the state bucket location without changing AWS resources. The credential-free Terraform checks run for every pull request, regardless of its target branch.
 
 ## Branch flow
 

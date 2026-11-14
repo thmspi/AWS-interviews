@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # GitHub Actions static analysis configuration
-# Recognizes the repository's registered local runner label.
+# Recognizes the repository's registered remote runner label.
 # -----------------------------------------------------------------------------
 self-hosted-runner:
   labels:
-    - aws-interviews-local
+    - aws-interviews-isolated-vm

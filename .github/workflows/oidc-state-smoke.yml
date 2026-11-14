@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # GitHub OIDC and Terraform state smoke test
-# Runs on the registered Mac after a push to any repository branch.
+# Runs on the remote server runner after a push to any repository branch.
 # Confirms the selected role and read-only access to the state bucket location.
 # -----------------------------------------------------------------------------
 name: OIDC state smoke
@@ -19,7 +19,7 @@ jobs:
   # ---------------------------------------------------------------------------
   verify:
     name: Verify branch OIDC
-    runs-on: [self-hosted, macOS, X64, aws-interviews-local]
+    runs-on: [self-hosted, Linux, X64, aws-interviews-isolated-vm]
     environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
     steps:
       - name: Assume environment role through OIDC
