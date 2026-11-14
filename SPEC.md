@@ -127,7 +127,7 @@ The user monitors approximately **USD 200 of AWS credits separately**, as decide
 
 ## 7. Terraform and GitHub Actions
 
-`dev` and `prod` have separate Terraform states and deployment roles. AWS infrastructure is created and changed only by Terraform executed in GitHub Actions. Workflows use OIDC and least-privilege permissions. The bootstrap role and remote state backend are initialized through a documented Terraform workflow, with no state or credentials committed. Provider, tool, and dependency versions are pinned. AgentCore may use the official `awscc` provider if its resource is not yet available in `hashicorp/aws` when implementation begins. [Terraform AgentCore Runtime resource](https://registry.terraform.io/providers/hashicorp/awscc/latest/docs/resources/bedrockagentcore_runtime).
+`dev` and `prod` have separate Terraform states and deployment roles. The GitHub OIDC provider, shared remote state bucket, and environment deployment roles are manually provisioned prerequisites. Application infrastructure is created and changed only by Terraform executed in GitHub Actions. Workflows use OIDC and least-privilege permissions, with no state or credentials committed. Provider, tool, and dependency versions are pinned. AgentCore may use the official `awscc` provider if its resource is not yet available in `hashicorp/aws` when implementation begins. [Terraform AgentCore Runtime resource](https://registry.terraform.io/providers/hashicorp/awscc/latest/docs/resources/bedrockagentcore_runtime).
 
 PR checks reuse the quality modules found in the local Structor repositories:
 
@@ -137,7 +137,7 @@ PR checks reuse the quality modules found in the local Structor repositories:
 | `structor-frontend/gitlab-ci/_frontend-base.yml` | Reproducible install, lint, typecheck, unit tests, and Vite build. |
 | `structor-infra/gitlab-ci/_terraform-base.yml` | `terraform fmt -check`, `validate`, plan, and Checkov; blocking results for PRs authorized to access plan state. |
 
-Scripts are adapted to this repository's paths and dependencies; GitLab YAML is not included directly. A PR does not publish the frontend or container, apply Terraform, or expose a binary/JSON plan that might contain sensitive values. Same-repository PRs may plan with a restricted read role; external PRs run credential-free checks and require a controlled rerun from a trusted branch before merge. No required check becomes manual, optional, or disabled to obtain a green result. After merge, a workflow deploys `dev`; promotion to `prod` requires environment approval and passing checks. Only these workflows publish artifacts.
+Scripts are adapted to this repository's paths and dependencies; GitLab YAML is not included directly. A PR does not publish the frontend or container, apply Terraform, or expose a binary/JSON plan that might contain sensitive values. Same-repository PRs may plan with a restricted read role; external PRs run credential-free checks and require a controlled rerun from a trusted branch before merge. No required check becomes manual, optional, or disabled to obtain a green result. `develop` and feature branches may deploy `dev`; only `main` may deploy `prod`, after environment approval and passing checks. Only these workflows publish artifacts.
 
 ## 8. Tests and release criteria
 
